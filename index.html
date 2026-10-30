@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<meta name="description" content="Controle suas finanças, contas e investimentos offline.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meu Controle">
+<title>Meu Controle — Finanças</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d2e;--panel2:#172438;--line:#26364d;--text:#eef4ff;--muted:#91a2ba;--green:#42d392;--red:#ff7185;--blue:#70b7ff;--yellow:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172944 0,#0b1220 55%);color:var(--text);font:15px Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.wrap{max-width:1120px;margin:auto;padding:28px 20px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#42d392,#168cba);display:grid;place-items:center;font-size:23px;color:#06251b}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.date{color:var(--muted);font-size:13px}
+h2{font-size:17px;margin:0 0 15px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}.card,.panel{background:linear-gradient(160deg,rgba(23,36,56,.98),rgba(16,27,43,.98));border:1px solid var(--line);border-radius:18px}.card{padding:18px}.card .label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}.card .value{font-size:25px;font-weight:750;margin-top:12px;letter-spacing:-.7px}.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.yellow{color:var(--yellow)}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.panel{padding:20px;margin-bottom:18px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:17px}.tab{border:1px solid var(--line);background:#101a2a;color:var(--muted);padding:9px 13px;border-radius:10px;cursor:pointer;font-weight:600}.tab.active{background:#1e684f;border-color:#2c9d70;color:#eafff5}
+form{display:grid;gap:12px}.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:grid;gap:6px;color:#b7c5d8;font-size:12px;font-weight:600}input,select,textarea{width:100%;border:1px solid var(--line);background:#0d1726;color:var(--text);padding:12px;border-radius:10px;font:inherit;outline:none}input:focus,select:focus,textarea:focus{border-color:#42d392}button{font:inherit}.primary{border:0;border-radius:11px;background:linear-gradient(135deg,#42d392,#20a879);color:#06251b;font-weight:800;padding:13px 16px;cursor:pointer}.secondary{border:1px solid var(--line);background:#142238;color:var(--text);padding:9px 12px;border-radius:9px;cursor:pointer}.small{font-size:12px;color:var(--muted);line-height:1.5}.list{display:grid;gap:10px}.item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px;background:#0e1929;border:1px solid #22334a;border-radius:12px}.item strong{display:block;font-size:14px}.item small{color:var(--muted);display:block;margin-top:4px}.amount{font-weight:750;white-space:nowrap}.item-actions{display:flex;gap:6px;margin-top:7px;justify-content:flex-end}.empty{text-align:center;color:var(--muted);padding:25px 10px;border:1px dashed var(--line);border-radius:12px}.pill{font-size:10px;padding:4px 7px;border-radius:20px;background:#1b3045;color:#a9c5e3;margin-left:5px}.pill.paid{background:#123d30;color:#75e4b2}.pill.pending{background:#46351b;color:#ffda8a}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.section-head h2{margin:0}.filter{max-width:170px;padding:9px}.bar{height:9px;background:#25344a;border-radius:20px;overflow:hidden;margin-top:10px}.bar span{display:block;height:100%;background:linear-gradient(90deg,#42d392,#70b7ff);border-radius:20px}.foot{text-align:center;color:#71839d;font-size:11px;margin-top:20px}.hidden{display:none!important}
+@media(min-width:801px){.cards{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.date{display:none}}
+@media(max-width:420px){.wrap{padding:20px 13px 40px}.card{padding:14px}.card .value{font-size:21px}.panel{padding:15px}.formrow{grid-template-columns:1fr}.item{align-items:flex-start}.amount{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand"><div class="logo">▣</div><div><h1>Meu Controle</h1><p>Suas finanças em um só lugar</p></div></div><div class="date" id="today"></div></header>
+<section class="cards">
+ <div class="card"><div class="label">💰 Saldo disponível em conta</div><div class="value" id="balance">R$ 0,00</div></div>
+ <div class="card"><div class="label">↗ Tenho a receber</div><div class="value blue" id="toReceive">R$ 0,00</div></div>
+ <div class="card"><div class="label">↙ Tenho a pagar</div><div class="value yellow" id="toPay">R$ 0,00</div></div>
+ <div class="card"><div class="label">📊 Resultado do mês</div><div class="value" id="monthResult">R$ 0,00</div></div>
+ <div class="card"><div class="label">📈 Carteira de investimentos</div><div class="value yellow" id="investmentTotal">R$ 0,00</div></div>
+ <div class="card"><div class="label">🧾 Contas pendentes no mês</div><div class="value yellow" id="billsPendingTotal">R$ 0,00</div></div>
+</section>
+<div class="grid">
+ <div>
+  <section class="panel">
+   <h2>Adicionar movimentação</h2>
+   <div class="tabs" id="moveTabs"><button class="tab active" data-kind="income">Entrada</button><button class="tab" data-kind="expense">Saída</button></div>
+   <form id="moveForm">
+    <div class="formrow"><label>Descrição<input id="moveDesc" placeholder="Ex.: salário, mercado..." required maxlength="70"></label><label>Valor (R$)<input id="moveAmount" type="number" min=".01" step=".01" placeholder="0,00" required></label></div>
+    <div class="formrow"><label>Categoria<select id="moveCategory"><option>Salário</option><option>Alimentação</option><option>Transporte</option><option>Moradia</option><option>Compras</option><option>Lazer</option><option>Saúde</option><option>Outros</option></select></label><label>Data<input id="moveDate" type="date" required></label></div>
+    <button class="primary" type="submit">＋ Salvar movimentação</button>
+   </form>
+  </section>
+  <section class="panel">
+   <h2>Registrar dinheiro emprestado</h2>
+   <div class="tabs" id="loanTabs"><button class="tab active" data-kind="lent">Emprestei</button><button class="tab" data-kind="borrowed">Peguei emprestado</button></div>
+   <form id="loanForm">
+    <div class="formrow"><label>Nome da pessoa<input id="person" placeholder="Quem está envolvido?" required maxlength="60"></label><label>Valor (R$)<input id="loanAmount" type="number" min=".01" step=".01" placeholder="0,00" required></label></div>
+    <div class="formrow"><label>Data<input id="loanDate" type="date" required></label><label>Data combinada para pagar<input id="dueDate" type="date"></label></div>
+    <label>Observação (opcional)<input id="loanNote" placeholder="Ex.: pagar em duas partes" maxlength="100"></label>
+    <p class="small">Sem juros: o sistema registra somente o valor combinado. Você pode marcar pagamentos parciais ou quitar tudo.</p>
+    <button class="primary" type="submit">＋ Registrar empréstimo</button>
+   </form>
+  </section>
+  <section class="panel">
+   <h2>Programar conta mensal</h2>
+   <form id="billForm">
+    <div class="formrow">
+     <label>Nome da conta<input id="billName" placeholder="Ex.: Internet, aluguel, academia..." required maxlength="70"></label>
+     <label>Valor mensal (R$)<input id="billAmount" type="number" min=".01" step=".01" placeholder="0,00" required></label>
+    </div>
+    <div class="formrow">
+     <label>Primeiro vencimento<input id="billStartDate" type="date" required></label>
+     <label>Categoria<select id="billCategory"><option>Moradia</option><option>Água</option><option>Energia</option><option>Internet</option><option>Telefone</option><option>Assinaturas</option><option>Educação</option><option>Saúde</option><option>Cartão</option><option>Outros</option></select></label>
+    </div>
+    <p class="small">Escolha a data do primeiro vencimento. Depois, a conta se repetirá todo mês a partir dessa data. Ela só será descontada do seu saldo quando você tocar em “Marcar como paga”.</p>
+    <button class="primary" type="submit">＋ Programar conta mensal</button>
+   </form>
+  </section>
+  <section class="panel">
+   <h2>Carteira de investimentos</h2>
+   <form id="investmentForm">
+    <div class="formrow">
+     <label>Tipo de investimento
+      <select id="investmentType">
+       <option value="Nubank / Renda fixa">Nubank / Renda fixa</option>
+       <option value="Criptomoedas">Criptomoedas</option>
+       <option value="Dólar">Dólar</option>
+       <option value="Ações / Fundos">Ações / Fundos</option>
+       <option value="Outro">Outro</option>
+      </select>
+     </label>
+     <label>Nome do ativo<input id="investmentName" placeholder="Ex.: CDB Nubank, Bitcoin, dólar..." required maxlength="60"></label>
+    </div>
+    <div class="formrow">
+     <label>Quanto você investiu (R$)<input id="investmentCost" type="number" min=".01" step=".01" placeholder="0,00" required></label>
+     <label>Valor atual (R$)<input id="investmentValue" type="number" min="0" step=".01" placeholder="0,00" required></label>
+    </div>
+    <div class="formrow">
+     <label>Quantidade (opcional)<input id="investmentQuantity" placeholder="Ex.: 0,002 BTC ou 50 USD" maxlength="40"></label>
+     <label>Data do investimento<input id="investmentDate" type="date" required></label>
+    </div>
+    <p class="small">Informe os valores em reais. Para Bitcoin e dólar, você pode anotar a quantidade e atualizar o valor atual manualmente. Ao cadastrar, o valor investido é descontado do saldo disponível e passa a fazer parte da carteira.</p>
+    <button class="primary" type="submit">＋ Adicionar à carteira</button>
+   </form>
+  </section>
+ </div>
+ <div>
+  <section class="panel">
+   <div class="section-head"><h2>Contas a pagar</h2><strong class="yellow" id="billsMonthLabel"></strong></div>
+   <p class="small">Contas recorrentes que você programou para pagar todos os meses.</p>
+   <div class="list" id="billsList"><div class="empty">Nenhuma conta programada.</div></div>
+  </section>
+  <section class="panel">
+   <div class="section-head"><h2>Minha carteira</h2><strong class="yellow" id="investmentGain">R$ 0,00</strong></div>
+   <p class="small">Lucro ou prejuízo em relação ao valor investido.</p>
+   <div class="list" id="investmentsList"><div class="empty">Nenhum investimento cadastrado.</div></div>
+  </section>
+  <section class="panel">
+   <div class="section-head"><h2>Empréstimos</h2><select class="filter" id="loanFilter"><option value="all">Todos</option><option value="pending">Em aberto</option><option value="paid">Quitados</option><option value="lent">Emprestei</option><option value="borrowed">Peguei</option></select></div>
+   <div class="list" id="loansList"><div class="empty">Nenhum empréstimo registrado.</div></div>
+  </section>
+  <section class="panel">
+   <div class="section-head"><h2>Movimentações</h2><select class="filter" id="moveFilter"><option value="all">Todas</option><option value="income">Entradas</option><option value="expense">Saídas</option></select></div>
+   <div class="list" id="movesList"><div class="empty">Nenhuma movimentação registrada.</div></div>
+  </section>
+  <section class="panel">
+   <h2>Resumo do mês</h2><div class="section-head"><span class="small" id="monthLabel"></span><strong id="monthTotal">R$ 0,00</strong></div><div class="bar"><span id="monthBar" style="width:0%"></span></div><p class="small" id="monthHint">Adicione entradas e saídas para acompanhar seu mês.</p>
+  </section>
+ </div>
+</div>
+<div class="foot">Seus dados ficam salvos neste navegador e neste aparelho.</div>
+</div>
+<script>
+const $=id=>document.getElementById(id), money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}), today=new Date().toISOString().slice(0,10);
+let moves=JSON.parse(localStorage.getItem('mc_moves')||'[]'), loans=JSON.parse(localStorage.getItem('mc_loans')||'[]'), investments=JSON.parse(localStorage.getItem('mc_investments')||'[]'), bills=JSON.parse(localStorage.getItem('mc_bills')||'[]'), moveKind='income',loanKind='lent';
+$('today').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+$('moveDate').value=today;$('loanDate').value=today;
+function save(){localStorage.setItem('mc_moves',JSON.stringify(moves));localStorage.setItem('mc_loans',JSON.stringify(loans));localStorage.setItem('mc_investments',JSON.stringify(investments));localStorage.setItem('mc_bills',JSON.stringify(bills));render()}
+function switchTabs(container,attr,cb){$(container).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ $(container).querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');cb(b.dataset.kind)}))}
+switchTabs('moveTabs','data-kind',v=>moveKind=v);switchTabs('loanTabs','data-kind',v=>loanKind=v);
+$('moveForm').addEventListener('submit',e=>{e.preventDefault();moves.unshift({id:Date.now(),kind:moveKind,desc:$('moveDesc').value.trim(),amount:+$('moveAmount').value,category:$('moveCategory').value,date:$('moveDate').value});e.target.reset();$('moveDate').value=today;save()});
+$('loanForm').addEventListener('submit',e=>{e.preventDefault();loans.unshift({id:Date.now(),kind:loanKind,person:$('person').value.trim(),amount:+$('loanAmount').value,paid:0,date:$('loanDate').value,due:$('dueDate').value,note:$('loanNote').value.trim()});e.target.reset();$('loanDate').value=today;save()});
+$('investmentDate').value=today;
+$('billForm').addEventListener('submit',e=>{e.preventDefault();const amount=+$('billAmount').value,startDate=$('billStartDate').value;if(!Number.isFinite(amount)||amount<=0||!startDate){alert('Confira o valor e a data do primeiro vencimento.');return}const day=Number(startDate.slice(8,10));bills.unshift({id:Date.now(),name:$('billName').value.trim(),amount,day,startDate,category:$('billCategory').value,paidMonths:[]});e.target.reset();save()});
+$('investmentForm').addEventListener('submit',e=>{e.preventDefault();const cost=+$('investmentCost').value,value=+$('investmentValue').value;if(!Number.isFinite(cost)||cost<=0||!Number.isFinite(value)||value<0){alert('Confira os valores do investimento.');return}investments.unshift({id:Date.now(),type:$('investmentType').value,name:$('investmentName').value.trim(),cost,value,quantity:$('investmentQuantity').value.trim(),date:$('investmentDate').value});e.target.reset();$('investmentDate').value=today;save()});
+$('loanFilter').addEventListener('change',renderLoans);$('moveFilter').addEventListener('change',renderMoves);
+function pay(id){const l=loans.find(x=>x.id===id);if(!l)return;const left=l.amount-l.paid;const raw=prompt(`Quanto foi pago? Valor restante: ${money(left)}`);if(raw===null)return;const val=Number(raw.replace(',','.'));if(!Number.isFinite(val)||val<=0||val>left){alert('Digite um valor válido, até '+money(left)+'.');return}l.paid=Math.min(l.amount,l.paid+val);save()}
+function removeLoan(id){if(confirm('Excluir este registro de empréstimo?')){loans=loans.filter(x=>x.id!==id);save()}}
+function removeMove(id){if(confirm('Excluir esta movimentação?')){moves=moves.filter(x=>x.id!==id);save()}}
+function dateFmt(s){if(!s)return 'Sem data de vencimento';return new Date(s+'T12:00:00').toLocaleDateString('pt-BR')}
+function renderLoans(){const f=$('loanFilter').value, arr=loans.filter(l=>{const status=l.paid>=l.amount?'paid':'pending';return f==='all'||f===status||f===l.kind});$('loansList').innerHTML=arr.length?'': '<div class="empty">Nenhum registro por aqui.</div>';arr.forEach(l=>{const left=l.amount-l.paid,paid=left<=0,dir=l.kind==='lent'?'Emprestei para':'Peguei de';const el=document.createElement('div');el.className='item';el.innerHTML=`<div><strong>${esc(l.person)} <span class="pill ${paid?'paid':'pending'}">${paid?'Quitado':'Em aberto'}</span></strong><small>${dir} · ${dateFmt(l.date)}<br>${l.due?'Vencimento: '+dateFmt(l.due):'Sem vencimento'}${l.note?' · '+esc(l.note):''}<br>Pago: ${money(l.paid)} de ${money(l.amount)}</small></div><div style="text-align:right"><div class="amount ${l.kind==='lent'?'blue':'yellow'}">${money(left)}</div><div class="item-actions">${!paid?`<button class="secondary" onclick="pay(${l.id})">Registrar pagamento</button>`:''}<button class="secondary" aria-label="Excluir" onclick="removeLoan(${l.id})">✕</button></div></div>`;$('loansList').appendChild(el)})}
+function renderMoves(){const f=$('moveFilter').value,arr=moves.filter(m=>f==='all'||m.kind===f);$('movesList').innerHTML=arr.length?'':'<div class="empty">Nenhuma movimentação registrada.</div>';arr.forEach(m=>{const el=document.createElement('div');el.className='item';el.innerHTML=`<div><strong>${esc(m.desc)}</strong><small>${esc(m.category)} · ${dateFmt(m.date)}</small></div><div style="text-align:right"><div class="amount ${m.kind==='income'?'green':'red'}">${m.kind==='income'?'+':'−'} ${money(m.amount)}</div><div class="item-actions"><button class="secondary" onclick="removeMove(${m.id})">Excluir</button></div></div>`;$('movesList').appendChild(el)})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function updateInvestment(id){const item=investments.find(x=>x.id===id);if(!item)return;const raw=prompt('Informe o valor atual deste investimento em reais:',String(item.value).replace('.',','));if(raw===null)return;const value=Number(raw.replace(',','.'));if(!Number.isFinite(value)||value<0){alert('Digite um valor válido.');return}item.value=value;save()}
+function removeInvestment(id){if(confirm('Excluir este investimento da carteira? O valor investido será devolvido ao saldo disponível no cálculo.')){investments=investments.filter(x=>x.id!==id);save()}}
+function renderInvestments(){const total=investments.reduce((a,x)=>a+(Number(x.value)||0),0),cost=investments.reduce((a,x)=>a+(Number(x.cost)||0),0),gain=total-cost;$('investmentTotal').textContent=money(total);$('investmentGain').textContent=(gain>=0?'+ ':'− ')+money(Math.abs(gain));$('investmentGain').className=gain>=0?'green':'red';$('investmentsList').innerHTML=investments.length?'':'<div class="empty">Nenhum investimento cadastrado.</div>';investments.forEach(x=>{const diff=(Number(x.value)||0)-(Number(x.cost)||0),el=document.createElement('div');el.className='item';el.innerHTML=`<div><strong>${esc(x.name)}</strong><small>${esc(x.type)} · ${dateFmt(x.date)}${x.quantity?' · '+esc(x.quantity):''}<br>Investido: ${money(x.cost)} · ${diff>=0?'Ganho':'Perda'}: ${money(Math.abs(diff))}</small></div><div style="text-align:right"><div class="amount ${diff>=0?'green':'red'}">${money(x.value)}</div><div class="item-actions"><button class="secondary" onclick="updateInvestment(${x.id})">Atualizar valor</button><button class="secondary" aria-label="Excluir investimento" onclick="removeInvestment(${x.id})">✕</button></div></div>`;$('investmentsList').appendChild(el)})}
+function currentMonthKey(){return today.slice(0,7)}
+function billActiveInMonth(b,monthKey){return !b.startDate||monthKey>=b.startDate.slice(0,7)}
+function billDueDate(day,monthKey){const [y,m]=monthKey.split('-').map(Number),last=new Date(y,m,0).getDate();return `${monthKey}-${String(Math.min(day,last)).padStart(2,'0')}`}
+function payBill(id){const b=bills.find(x=>x.id===id);if(!b)return;const key=currentMonthKey();if((b.paidMonths||[]).includes(key)){alert('Esta conta já foi marcada como paga neste mês.');return}if(!confirm(`Confirmar pagamento de ${b.name} no valor de ${money(b.amount)}?`))return;b.paidMonths=b.paidMonths||[];b.paidMonths.push(key);moves.unshift({id:Date.now(),kind:'expense',desc:b.name,amount:Number(b.amount),category:b.category,date:today,billId:b.id});save()}
+function removeBill(id){if(confirm('Excluir esta conta programada? Os pagamentos já registrados no histórico não serão apagados.')){bills=bills.filter(b=>b.id!==id);save()}}
+function renderBills(){const key=currentMonthKey();$('billsMonthLabel').textContent=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});const activeBills=bills.filter(b=>billActiveInMonth(b,key));const pending=activeBills.filter(b=>!(b.paidMonths||[]).includes(key)).reduce((a,b)=>a+Number(b.amount||0),0);$('billsPendingTotal').textContent=money(pending);$('billsList').innerHTML=bills.length?'':'<div class="empty">Nenhuma conta programada.</div>';const sorted=[...activeBills].sort((a,b)=>a.day-b.day);sorted.forEach(b=>{const paid=(b.paidMonths||[]).includes(key),due=billDueDate(b.day,key),el=document.createElement('div');el.className='item';el.innerHTML=`<div><strong>${esc(b.name)} <span class="pill ${paid?'paid':'pending'}">${paid?'Paga neste mês':'Pendente'}</span></strong><small>${esc(b.category)} · Vencimento: ${dateFmt(due)}<br>Valor mensal: ${money(b.amount)}</small></div><div style="text-align:right"><div class="amount ${paid?'green':'yellow'}">${money(b.amount)}</div><div class="item-actions">${!paid?`<button class="secondary" onclick="payBill(${b.id})">Marcar como paga</button>`:''}<button class="secondary" aria-label="Excluir conta" onclick="removeBill(${b.id})">✕</button></div></div>`;$('billsList').appendChild(el)})}
+function render(){const inc=moves.filter(m=>m.kind==='income').reduce((a,m)=>a+m.amount,0),out=moves.filter(m=>m.kind==='expense').reduce((a,m)=>a+m.amount,0),lentOpen=loans.filter(l=>l.kind==='lent').reduce((a,l)=>a+Math.max(0,l.amount-l.paid),0),borrowedOpen=loans.filter(l=>l.kind==='borrowed').reduce((a,l)=>a+Math.max(0,l.amount-l.paid),0),rec=lentOpen,payable=borrowedOpen;const invested=investments.reduce((a,x)=>a+(Number(x.cost)||0),0);const available=inc-out-lentOpen+borrowedOpen-invested;$('balance').textContent=money(available);$('toReceive').textContent=money(rec);$('toPay').textContent=money(payable);renderInvestments();renderBills();
+const ym=today.slice(0,7),mm=moves.filter(m=>m.date?.slice(0,7)===ym),mi=mm.filter(m=>m.kind==='income').reduce((a,m)=>a+m.amount,0),mo=mm.filter(m=>m.kind==='expense').reduce((a,m)=>a+m.amount,0),res=mi-mo;$('monthResult').textContent=money(res);$('monthResult').className='value '+(res>=0?'green':'red');$('monthLabel').textContent=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});$('monthTotal').textContent=money(res);$('monthBar').style.width=(mi+mo?Math.min(100,mi/(mi+mo)*100):0)+'%';$('monthHint').textContent=`Entradas: ${money(mi)} · Saídas: ${money(mo)}`;renderLoans();renderMoves()}
+render();
+</script>
+<script>
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+</script>
+</body></html>
